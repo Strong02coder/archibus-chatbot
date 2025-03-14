@@ -1,20 +1,22 @@
-import streamlit as st
-import google.generativeai as genai
+import streamlit as st  # Importing Streamlit library for creating web apps
+import google.generativeai as genai  # Importing Google's Generative AI library
 
 
+# Fetch the API key from the secrets file
 api_key = st.secrets['defaults']['GOOGLE_API_KEY']
+# Configure the Generative AI with the API key
 genai.configure(api_key=api_key)
 
-# Define generation parameters
+# Define generation parameters for the AI model
 generation_config = {
-    "temperature": 1,
-    "top_p": 0.95,
-    "top_k": 40,
-    "max_output_tokens": 8192,
-    "response_mime_type": "text/plain",
+    "temperature": 1,  # Controls the randomness of the output
+    "top_p": 0.95,  # Controls the diversity of the output
+    "top_k": 40,  # Limits the sampling pool to the top k tokens
+    "max_output_tokens": 8192,  # Maximum number of tokens in the output
+    "response_mime_type": "text/plain",  # MIME type of the response
 }
 
-# Base system instruction
+# Base system instruction for the AI assistant
 base_instruction = """
 You are a professional AI assistant for Archibus.
 
@@ -43,11 +45,11 @@ with open("Data.txt", "r") as file:
 # Combine static system instruction with custom instruction
 full_instruction = f"{base_instruction}\n\n{custom_instruction}"
 
-# Store in session state (without displaying it)
+# Store the combined instruction in session state (without displaying it)
 if "custom_instruction" not in st.session_state:
     st.session_state.custom_instruction = full_instruction
 
-# Create the model instance
+# Create the GenerativeModel instance with the combined instructions
 model = genai.GenerativeModel(
     model_name="gemini-2.0-flash",
     generation_config=generation_config,
@@ -58,13 +60,13 @@ model = genai.GenerativeModel(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat history
+# Function to display chat history
 def display_chat_history():
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-# Handle user input and get assistant response
+# Function to handle user input and get assistant response
 def handle_user_input(prompt: str):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
